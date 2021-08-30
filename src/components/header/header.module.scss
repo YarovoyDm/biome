@@ -1,0 +1,75 @@
+header{
+    height: 80px;
+    border-bottom: 1px solid #ccc;
+    padding: 0px 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo{
+    font-weight: bold;
+    line-height: 80px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 24px;
+    height: 100%;
+    width: 100px;
+}
+
+.right{color: black;}
+
+.headerUser{
+    position: relative;
+    
+}
+
+.headerUserName{
+    color: rgb(128, 123, 123);
+    cursor: pointer;
+    &:hover{
+        color: black;
+    }
+}
+
+.headerUserMenu{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: solid 1px #ccc;
+    width: 100px;
+    position: absolute;
+    top: 49px;
+    right: 0px;
+    
+    div{
+        width: 100%;
+        text-align: center;
+        height: 30px;
+        line-height: 30px;
+        cursor: pointer;
+        color: rgb(128, 123, 123);
+        &:hover{
+            color: black;
+        }
+    }
+}
+
+.authButtons{
+    display: flex;
+    .authButton{
+        width: 70px;
+        text-align: center;
+        color: rgb(128, 123, 123);
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 10px;
+        height: 30px;
+        line-height: 30px;
+        border: solid 1px rgb(128, 123, 123);
+        &:hover{
+            border: solid 1px black;
+            color: black;
+        }
+    }
+}

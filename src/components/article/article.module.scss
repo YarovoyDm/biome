@@ -1,0 +1,98 @@
+.article{
+    width: calc(100% - 20px);
+    border-bottom: solid 1px #ccc;
+    padding: 10px;
+    .articleHeader{
+        margin-bottom: 10px
+    }
+}
+
+.articleHeader{
+    display: flex;
+    justify-content: space-between;
+}
+
+.userPhoto{
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    background: #ccc;
+}
+
+.userBlock{
+    display: flex;
+    align-items: center;
+}
+
+.userPhoto{
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+.userName{
+    cursor: pointer;
+    &:hover{
+        text-decoration: underline;
+    }
+}
+
+.articleMenuButton{
+    width: 15px;
+    height: 35px;
+}
+
+.articleMenu{
+    display: flex;
+    width: 30px;
+    height: 30px;
+    border-radius: 30px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    &:hover{
+        background: #ccc;
+    }
+}
+
+.articleTitle{
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.articleFooter{
+    display: flex;
+}
+
+.articleMain{
+    margin-bottom: 20px;
+    div{
+        margin-right: 10px;
+    }
+}
+
+.articleLikes,
+.articleComments,
+.articleViews{
+    display: flex;
+    align-items: center;
+}
+
+.articleLikes,
+.articleComments{
+    margin-right: 10px;
+}
+
+.articleSvg{
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+}
+
+.articleLike{
+    cursor: pointer;
+    &:hover{
+        path{
+            fill: red
+        }
+    }
+}

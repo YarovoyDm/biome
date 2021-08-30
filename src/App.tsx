@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect } from 'react';
 import './App.css';
+import Feed from './components/feed/feed';
+import Header from './components/header/header';
+import {
+  Switch,
+  Route,
+} from "react-router-dom";
+import SignUpPage from './container/authPage/authPage';
+import { saveUser } from './redux/action';
+import { useDispatch } from 'react-redux'
+import {withRouter} from 'react-router'
+import UserPage from './container/userPage/userPage';
 
 function App() {
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    const userIdLocal = window.localStorage.getItem('userID')
+    const userNameLocal = window.localStorage.getItem('userName')
+    dispatch(saveUser(userIdLocal, userNameLocal))
+  })
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Header />
+      <Switch>
+        <Route exact={true} path='/feed' component={Feed} />
+        <Route path='/auth' component={withRouter(SignUpPage)} />
+        <Route path='/account/:nick' component={withRouter(UserPage)} />
+      </Switch>
     </div>
   );
 }
 
-export default App;
+export default withRouter(App);
