@@ -1,0 +1,14 @@
+.FollowButton{
+    width: 100px;
+    height: 30px;
+    border: solid 1px rgb(128, 123, 123);
+    text-align: center;
+    line-height: 30px;
+    border-radius: 5px;
+    color: rgb(128, 123, 123);
+    cursor: pointer;
+    &:hover{
+        color: black;
+        border: solid 1px black;
+    }
+}
