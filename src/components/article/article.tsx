@@ -3,6 +3,7 @@ import {ReactComponent as MenuIcon} from '../../images/menuIcon.svg';
 import {ReactComponent as Like} from '../../images/like.svg';
 import {ReactComponent as Comment} from '../../images/comment.svg';
 import {ReactComponent as Views} from '../../images/views.svg';
+import { getDatabase, ref, child, set, get, remove, update } from "firebase/database";
 import cn from 'classnames'
 
 interface IArticle  {
@@ -15,6 +16,15 @@ interface IArticle  {
 }
 
 const Article: React.FC<IArticle> = (props) => {
+    const userNameLocal = window.localStorage.getItem('userName')
+
+    const addLike = () => {
+        const db = getDatabase();
+        update(ref(db, `users/${props.userName}/articles/${props.articleTitle}/likes/`), {
+            [userNameLocal as string]: Date.now()
+        });
+    }
+
     return (
         <div className={styles.article}>
             <div className={styles.articleHeader}>
@@ -31,7 +41,7 @@ const Article: React.FC<IArticle> = (props) => {
                 <div className={styles.articleText}>{props.articleText}</div>
             </div>
             <div className={styles.articleFooter}>
-                <div className={styles.articleLikes}>
+                <div className={styles.articleLikes} onClick={() => addLike()}>
                     <Like className={cn(styles.articleSvg, styles.articleLike)}/> 
                     {props.articleLikes}
                 </div>

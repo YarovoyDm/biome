@@ -43,7 +43,7 @@ const Header = () => {
                     <div className={styles.headerUser}>
                         <div className={styles.headerUserName} onClick={() => userMenuHandler()}>{userName}</div>
                         {userMenuShow && <div className={styles.headerUserMenu}>
-                            <Link to={'/account/' + userName}>Profile</Link>
+                            <Link to={'/account/' + userName} onClick={() => setUserMenuShow(false)}>Profile</Link>
                             <div>Settings</div>
                             <div onClick={() => exit()}>Log out</div>
                         </div>}

@@ -27,7 +27,7 @@ function App() {
       <Switch>
         <Route exact={true} path='/feed' component={Feed} />
         <Route path='/auth' component={withRouter(SignUpPage)} />
-        <Route path='/account/:nick' component={withRouter(UserPage)} />
+        <Route path='/account/:nick' component={UserPage} />
       </Switch>
     </div>
   );

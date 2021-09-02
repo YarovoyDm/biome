@@ -6,9 +6,39 @@ import { Link } from "react-router-dom";
 import styles from './userPage.module.scss'
 import Article from '../../components/article/article';
 
-const UserPage: React.FC = (props: any) => {
+interface IUserPageState {
+    articlePopupIsOpen: string,
+    articleTitle: string,
+    articleText: string,
+    popupFor: Boolean,
+    userInfo: {
+        displayName: string
+    },
+    itsNotMe: Boolean,
+    currentUserAlreadyFollowed: Boolean,
+    currentTarget:{
+        id: string,
+        followers: object,
+        followed: object
+    },
+}
+
+const UserPage: React.FC<IUserPageState> = (props: any) => {
     const userNameLocal = window.localStorage.getItem('userName')
-    const userIdLocal: any = window.localStorage.getItem('userID')
+    const userIdLocal: string | null = window.localStorage.getItem('userID')
+    const [componentState, setComponentState] = useState({
+        articleTitle: '',
+        articleText: '',
+        articlePopupIsOpen: false,
+        popupFor: false,
+        currentUserAlreadyFollowed: false,
+        userInfo: {
+            id: '',
+            followers: {},
+            followed: {}
+        },
+        userArticles: []
+    })
     const [articlePopupIsOpen, setArticlePopupIsOpen] = useState(false)
     const [articleTitle, setArticleTitle] = useState('')
     const [articleText, setArticleText] = useState('')
@@ -16,7 +46,6 @@ const UserPage: React.FC = (props: any) => {
     const [userInfo, setUserInfo] = useState({
         displayName: ''
     })
-    const [itsNotMe, setItsNotMe] = useState(false)
     const [currentUserAlreadyFollowed, setCurrentUserAlreadyFollowed] = useState(false)
     const [currentTarget, setCurrentTarget] = useState({
         id: '',
@@ -25,14 +54,13 @@ const UserPage: React.FC = (props: any) => {
     })
     const [userArticles, setUserArticle] = useState<any>([])
     const nickFromUrl = props.match.params.nick
+    const itsNotMe = userNameLocal !== nickFromUrl
 
     useEffect(() => {
         const dbRef = ref(getDatabase());
         get(child(dbRef, `users/${nickFromUrl}`)).then((snapshot) => {
             if (snapshot.exists()) {
                 setUserInfo(snapshot.val())
-                setCurrentTarget(snapshot.val())
-                setItsNotMe(userNameLocal !== nickFromUrl)
             } else {
                 console.log("No data available");
             }
@@ -68,7 +96,7 @@ const UserPage: React.FC = (props: any) => {
             [userIdLocal]: userNameLocal
         });
         update(ref(db, `users/${userNameLocal}/followed`), {
-            [currentTarget.id]: nickFromUrl
+            [componentState.userInfo.id]: nickFromUrl
         });
         setCurrentUserAlreadyFollowed(true)
     }
@@ -76,7 +104,7 @@ const UserPage: React.FC = (props: any) => {
     const unfollowUser = () => {
         const db = getDatabase();
         remove(ref(db, `users/${nickFromUrl}/followers/${userIdLocal}`));
-        remove(ref(db, `users/${userNameLocal}/followed/${currentTarget.id}`));
+        remove(ref(db, `users/${userNameLocal}/followed/${componentState.userInfo.id}`));
         setCurrentUserAlreadyFollowed(false)
     }
 
@@ -143,10 +171,10 @@ const UserPage: React.FC = (props: any) => {
     const renderFollowInfoPopup = () => {
         let data = null
         if (popupFor === 'followers') {
-            data = currentTarget.followers ? Object.values(currentTarget.followers) : []
+            data = componentState.userInfo.followers ? Object.values(componentState.userInfo.followers) : []
         }
         if (popupFor === 'followed') {
-            data = currentTarget.followed ? Object.values(currentTarget.followed) : []
+            data = componentState.userInfo.followed ? Object.values(componentState.userInfo.followed) : []
         }
         return <div className={styles.popup}>
             <div className={styles.popupHeader}>
@@ -184,7 +212,7 @@ const UserPage: React.FC = (props: any) => {
                 <div className={styles.userBlock}>
                     <div className={styles.userPhoto}></div>
                     <div className={styles.userInfo}>
-                        <div className={styles.userName}>@{userInfo.displayName}</div>
+                        <div className={styles.userName}>@{nickFromUrl}</div>
                         <div className={styles.userInfoActivity}>
                             {popupFor && renderFollowInfoPopup()}
                             <div className={styles.userPosts}>0 Posts</div>
@@ -192,12 +220,12 @@ const UserPage: React.FC = (props: any) => {
                                 onClick={() => setPopupFor('followers')}
                                 className={styles.userFollowers}
                             >
-                                {currentTarget.followers ? Object.values(currentTarget.followers).length : 0} Followers
+                                {componentState.userInfo.followers ? Object.values(componentState.userInfo.followers).length : 0} Followers
                             </div>
                             <div className={styles.userFollowed}
                                 onClick={() => setPopupFor('followed')}
                             >
-                                {currentTarget.followed ? Object.values(currentTarget.followed).length : 0} Followed
+                                {componentState.userInfo.followed ? Object.values(componentState.userInfo.followed).length : 0} Followed
                             </div>
                         </div>
                         {renderFollowButton()}

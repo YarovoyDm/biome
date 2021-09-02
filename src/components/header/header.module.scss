@@ -41,7 +41,19 @@ header{
     position: absolute;
     top: 49px;
     right: 0px;
-    
+    z-index: 999;
+    a{
+        width: 100%;
+        text-align: center;
+        height: 30px;
+        line-height: 30px;
+        cursor: pointer;
+        color: rgb(128, 123, 123);
+        text-decoration: none;
+        &:hover{
+            color: black;
+        }
+    }
     div{
         width: 100%;
         text-align: center;
