@@ -1,10 +1,13 @@
-import styles from './article.module.scss'
+import React, {useState} from 'react'
+import { getDatabase, ref, remove, update } from "firebase/database";
+import cn from 'classnames'
+
 import {ReactComponent as MenuIcon} from '../../images/menuIcon.svg';
 import {ReactComponent as Like} from '../../images/like.svg';
 import {ReactComponent as Comment} from '../../images/comment.svg';
 import {ReactComponent as Views} from '../../images/views.svg';
-import { getDatabase, ref, child, set, get, remove, update } from "firebase/database";
-import cn from 'classnames'
+
+import styles from './article.module.scss'
 
 interface IArticle  {
     userName: string,
@@ -12,17 +15,24 @@ interface IArticle  {
     articleText: string,
     articleLikes: number,
     articleComments: number,
-    articleViews: number
+    articleViews: number,
+    isMe: Boolean
 }
 
 const Article: React.FC<IArticle> = (props) => {
     const userNameLocal = window.localStorage.getItem('userName')
+    const db = getDatabase();
+    const [articleMenuIsOpen, setArticleMenuIsOpen] = useState(false)
 
     const addLike = () => {
-        const db = getDatabase();
         update(ref(db, `users/${props.userName}/articles/${props.articleTitle}/likes/`), {
             [userNameLocal as string]: Date.now()
         });
+    }
+
+    const removeArticle = () => {
+        remove(ref(db, `users/${userNameLocal}/articles/${props.articleTitle}`))
+        setArticleMenuIsOpen(false)
     }
 
     return (
@@ -32,8 +42,17 @@ const Article: React.FC<IArticle> = (props) => {
                     <div className={styles.userPhoto}></div>
                     <div className={styles.userName}>{props.userName}</div>
                 </div>
-                <div className={styles.articleMenu}>
-                    <MenuIcon className={styles.articleMenuButton}/>
+                <div className={styles.articleMenuBlock}>
+                    <div className={styles.articleMenuWrapper} onClick={() => setArticleMenuIsOpen(!articleMenuIsOpen)}>
+                        <MenuIcon className={styles.articleMenuButton}/>
+                    </div>
+                    {articleMenuIsOpen && <div className={styles.articleMenu}>
+                        {props.isMe 
+                        ? 
+                        <div className={styles.articleMenuItem} onClick={() => removeArticle()}>Delete an article</div> 
+                        : 
+                        <div className={styles.articleMenuItem}>Report</div>}  
+                    </div>}
                 </div>
             </div>
             <div className={styles.articleMain}>

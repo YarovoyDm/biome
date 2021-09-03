@@ -82,6 +82,7 @@ const Feed = () => {
     const renderArticles = () => {
         return _.map(data, item => {
             return <Article 
+                isMe={false}
                 userName={item.userName}
                 articleTitle={item.articleTitle}
                 articleText={item.articleText}

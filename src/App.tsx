@@ -11,6 +11,7 @@ import { saveUser } from './redux/action';
 import { useDispatch } from 'react-redux'
 import {withRouter} from 'react-router'
 import UserPage from './container/userPage/userPage';
+import {PublicRoute, PrivateRoute} from './routeComponents'
 
 function App() {
   const dispatch = useDispatch()
@@ -26,8 +27,8 @@ function App() {
       <Header />
       <Switch>
         <Route exact={true} path='/feed' component={Feed} />
-        <Route path='/auth' component={withRouter(SignUpPage)} />
-        <Route path='/account/:nick' component={UserPage} />
+        <PublicRoute restricted={true} path='/auth' component={withRouter(SignUpPage)} />
+        <PrivateRoute path='/account/:nick' component={withRouter(UserPage)} />
       </Switch>
     </div>
   );

@@ -1,46 +1,57 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { getDatabase, ref, set, child, get } from "firebase/database";
-import { connect } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
 import { saveUser } from '../../redux/action'
-import { useDispatch } from 'react-redux'
 
 import styles from './auth.module.scss'
 
 const Auth: React.FC = () => {
-
-    const [emailLogin, setEmailLogin] = useState('')
-    const [passwordLogin, setPasswordLogin] = useState('')
-    const [emailSignUp, setEmailSignUp] = useState('')
-    const [passwordSignUp, setPasswordSignUp] = useState('')
+    const [authInputs, setAuthInputs] = useState({
+        loginInputs:{
+            email: '',
+            password: ''
+        },
+        signUpInputs:{
+            email: '',
+            password: '',
+            repeatPassword: '',
+            name: ''
+        }
+    })
+    const {loginInputs, signUpInputs} = authInputs
     const [isSignUp, setIsSignUp] = useState(false)
-    const [name, setName] = useState('')
-    const [repeatPassword, setRepeatPassword] = useState('')
     const dispatch = useDispatch()
 
     const signUp = () => {
         const auth = getAuth();
         const db = getDatabase();
-        passwordSignUp === repeatPassword
+        signUpInputs.password === signUpInputs.repeatPassword
             ?
-            createUserWithEmailAndPassword(auth, emailSignUp, passwordSignUp)
+            createUserWithEmailAndPassword(auth, signUpInputs.email, signUpInputs.password)
                 .then((userCredential) => {
                     const user = userCredential.user;
 
-                    set(ref(db, 'users/' + name), {
-                        email: emailSignUp,
-                        displayName: name,
+                    set(ref(db, 'users/' + signUpInputs.name), {
+                        email: signUpInputs.email,
+                        displayName: signUpInputs.name,
                         id: user.uid
                     });
-
-                    setRepeatPassword('')
-                    setName('')
-                    setPasswordSignUp('')
-                    setEmailSignUp('')
-
-                    dispatch(saveUser(user.uid, name))
+                    set(ref(db, '/nicknames'), [
+                        signUpInputs.name
+                    ]);
+                    setAuthInputs((prev) => ({
+                        ...prev,
+                        signUpInputs:{
+                            email: '',
+                            password: '',
+                            repeatPassword: '',
+                            name: ''
+                        }
+                    }))
+                    dispatch(saveUser(user.uid, signUpInputs.name))
                     window.localStorage.setItem('userID', user.uid)
-                    window.localStorage.setItem('userName', name)
+                    window.localStorage.setItem('userName', signUpInputs.name)
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -51,14 +62,19 @@ const Auth: React.FC = () => {
 
     const login = () => {
         const auth = getAuth();
-        signInWithEmailAndPassword(auth, emailLogin, passwordLogin)
+        signInWithEmailAndPassword(auth, loginInputs.email, loginInputs.password)
             .then((userCredential) => {
                 const user = userCredential.user;
                 const dbRef = ref(getDatabase());
-                get(child(dbRef, `users/${name}`)).then((snapshot) => {
+                get(child(dbRef, `users/${signUpInputs.name}`)).then((snapshot) => {
                     if (snapshot.exists()) {
-                        setEmailLogin('')
-                        setPasswordLogin('')
+                        setAuthInputs((prev) => ({
+                            ...prev,
+                            loginInputs:{
+                                email: '',
+                                password: ''
+                            }
+                        }))
                         dispatch(saveUser(user.uid, snapshot.val().displayName))
                         window.localStorage.setItem('userID', user.uid)
                         window.localStorage.setItem('userName', snapshot.val().displayName)
@@ -75,23 +91,14 @@ const Auth: React.FC = () => {
             });
     }
 
-    const emailSignUpHandler = (e: React.FormEvent<HTMLInputElement>) => {
-        setEmailSignUp(e.currentTarget.value)
-    }
-    const passwordSignUpHandler = (e: React.FormEvent<HTMLInputElement>) => {
-        setPasswordSignUp(e.currentTarget.value)
-    }
-    const emailLoginHandler = (e: React.FormEvent<HTMLInputElement>) => {
-        setEmailLogin(e.currentTarget.value)
-    }
-    const passwordLoginHandler = (e: React.FormEvent<HTMLInputElement>) => {
-        setPasswordLogin(e.currentTarget.value)
-    }
-    const nameHandler = (e: React.FormEvent<HTMLInputElement>) => {
-        setName(e.currentTarget.value)
-    }
-    const repeatPasswordHandler = (e: React.FormEvent<HTMLInputElement>) => {
-        setRepeatPassword(e.currentTarget.value)
+    const AuthInputHandler = (e: any, inputName: string, authMethod: keyof(typeof authInputs)) => {
+        setAuthInputs((prev) => ({
+            ...prev,
+            [authMethod]:{
+                ...prev[authMethod],
+                [inputName]: e.target.value
+            }
+        }))
     }
 
     const changeAuthMethod = () => {
@@ -106,26 +113,26 @@ const Auth: React.FC = () => {
                 ? <div className={styles.signUpForm}>
                     <input
                         className={styles.authInput}
-                        value={name}
-                        onChange={(e) => nameHandler(e)}
+                        value={signUpInputs.name}
+                        onChange={(e) => AuthInputHandler(e, 'name', 'signUpInputs')}
                         placeholder='Name or nickname'
                     />
                     <input
                         className={styles.authInput}
-                        value={emailSignUp}
-                        onChange={(e) => emailSignUpHandler(e)}
+                        value={signUpInputs.email}
+                        onChange={(e) => AuthInputHandler(e, 'email', 'signUpInputs')}
                         placeholder='Email'
                     />
                     <input
                         className={styles.authInput}
-                        value={passwordSignUp}
-                        onChange={(e) => passwordSignUpHandler(e)}
+                        value={signUpInputs.password}
+                        onChange={(e) => AuthInputHandler(e, 'password', 'signUpInputs')}
                         placeholder='Password'
                     />
                     <input
                         className={styles.authInput}
-                        value={repeatPassword}
-                        onChange={(e) => repeatPasswordHandler(e)}
+                        value={signUpInputs.repeatPassword}
+                        onChange={(e) => AuthInputHandler(e, 'repeatPassword', 'signUpInputs')}
                         placeholder='Repeat password'
                     />
                     <button className={styles.authButton} onClick={() => signUp()}>Sign up</button>
@@ -144,15 +151,15 @@ const Auth: React.FC = () => {
                     <input
                         className={styles.authInput}
                         required
-                        value={emailLogin}
-                        onChange={(e) => emailLoginHandler(e)}
+                        value={loginInputs.email}
+                        onChange={(e) => AuthInputHandler(e, 'email', 'loginInputs')}
                         placeholder='Email'
                     />
                     <input
                         className={styles.authInput}
                         required
-                        value={passwordLogin}
-                        onChange={(e) => passwordLoginHandler(e)}
+                        value={loginInputs.password}
+                        onChange={(e) => AuthInputHandler(e, 'password', 'loginInputs')}
                         placeholder='Password'
                     />
                     <button className={styles.authButton} onClick={() => login()}>Login</button>

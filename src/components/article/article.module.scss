@@ -39,19 +39,23 @@
 .articleMenuButton{
     width: 15px;
     height: 35px;
+    
 }
-
-.articleMenu{
+.articleMenuWrapper{
     display: flex;
     width: 30px;
     height: 30px;
     border-radius: 30px;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
     &:hover{
         background: #ccc;
     }
+}
+
+.articleMenuBlock{
+    position: relative;
+    cursor: pointer;
 }
 
 .articleTitle{
@@ -94,5 +98,24 @@
         path{
             fill: red
         }
+    }
+}
+.articleMenu{
+    position: absolute;
+    background: white;
+    border-radius: 5px;
+    padding: 10px;
+    top: 30px;
+    right: 0px;
+    width: 150px;
+    height: 100px;
+    border: solid 1px rgb(128, 123, 123);
+}
+
+.articleMenuItem{
+    color: rgb(128, 123, 123);
+    cursor: pointer;
+    &:hover{
+        color: black;
     }
 }
