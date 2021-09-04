@@ -6,12 +6,14 @@ import {
   Switch,
   Route,
 } from "react-router-dom";
-import SignUpPage from './container/authPage/authPage';
+import AuthPage from './container/authPage/authPage';
 import { saveUser } from './redux/action';
 import { useDispatch } from 'react-redux'
 import {withRouter} from 'react-router'
 import UserPage from './container/userPage/userPage';
 import {PublicRoute, PrivateRoute} from './routeComponents'
+import Chat from './container/chat/chat';
+import Messages from './container/messages/messages';
 
 function App() {
   const dispatch = useDispatch()
@@ -27,7 +29,8 @@ function App() {
       <Header />
       <Switch>
         <Route exact={true} path='/feed' component={Feed} />
-        <PublicRoute restricted={true} path='/auth' component={withRouter(SignUpPage)} />
+        <PrivateRoute path='/account/:nick/messages' component={Messages} />
+        <PublicRoute restricted={true} path='/auth' component={withRouter(AuthPage)} />
         <PrivateRoute path='/account/:nick' component={withRouter(UserPage)} />
       </Switch>
     </div>

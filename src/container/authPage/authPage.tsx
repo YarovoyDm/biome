@@ -6,7 +6,7 @@ import { getDatabase, ref, set, child, get } from "firebase/database";
 import styles from './loginPage.module.scss'
 import Auth from '../../components/auth/auth';
 
-const SignUpPage: React.FC = () => {
+const AuthPage: React.FC = () => {
     useEffect(() => {
         const dbRef = ref(getDatabase());
         get(child(dbRef, '/')).then((snapshot) => {
@@ -27,4 +27,4 @@ const SignUpPage: React.FC = () => {
     )
 }
 
-export default SignUpPage
+export default AuthPage

@@ -2,7 +2,7 @@ import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { RootStateOrAny, useSelector } from 'react-redux'
 
-export const PrivateRoute: React.FC<any> = ({component: Component, ...rest}) => {
+export const PublicRoute: React.FC<any> = ({component: Component, ...rest}) => {
     const user = useSelector((state: RootStateOrAny) => {
         return state.auth.currentUser.userName
     })  
@@ -15,7 +15,7 @@ export const PrivateRoute: React.FC<any> = ({component: Component, ...rest}) => 
     );
 };
 
-export const PublicRoute: React.FC<any> = ({component: Component, restricted, ...rest}) => {
+export const PrivateRoute: React.FC<any> = ({component: Component, restricted, ...rest}) => {
     const user = useSelector((state: RootStateOrAny) => {
         return state.auth.currentUser.userName
     })  

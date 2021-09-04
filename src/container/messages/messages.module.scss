@@ -1,0 +1,97 @@
+.messages{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 0px;
+    .messagesMain{
+        width: 60%;
+        height: calc(100vh - 160px);
+        border: solid 1px black;
+        border-radius: 5px;
+        display: flex;
+        .mainChats{
+            display: flex;
+            flex-direction: column;
+            width: 30%;
+            border-right: solid 1px black;
+            height: 100%;
+            .chatItem{
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                border-bottom: solid 1px rgb(128, 123, 123);
+                &:hover{
+                    background: rgb(128, 123, 123);
+                }
+            }
+        }
+        .chatBlock{
+            width: 100%;
+            height: 100%;
+            .chatBody{
+                height: calc(100% - 100px);
+                display: flex;
+                flex-direction: column-reverse;
+                overflow-y: auto;
+                padding: 20px 0px;
+                .messageBlock{
+                    width: calc(100% - 30px);
+                    margin-top: 20px;
+                    padding-right: 30px;
+                    display: flex;
+                    justify-content: flex-end;
+                    .messageWrapper{
+                        display: flex;
+                        align-items: flex-end;
+                        .messageDate{
+                            font-size: 14px;
+                            color: rgb(128, 123, 123);
+                        }
+                        .messageText{
+                            padding: 10px;
+                            background: #d6d6d6;
+                            border-radius: 5px;
+                            max-width: 150px;
+                            word-wrap: break-word;
+                            margin-left: 10px;
+                            color: rgb(128, 123, 123);
+                        }
+                    }
+                }
+                .messageBlockIncoming{
+                    justify-content: flex-start
+                }
+            }
+            .chatFooter{
+                display: flex;
+                border-top: solid 1px rgb(128, 123, 123);
+                align-items: center;
+                justify-content: center;
+                height: 60px;
+                .chatInput{
+                    width: 70%;
+                    height: 30px;
+                    margin-right: 30px;
+                    outline: none;
+                }
+                .chatSend{
+                    height: 30px;
+                    width: 70px;
+                    text-align: center;
+                    line-height: 30px;
+                    cursor: pointer;
+                    background: white;
+                    border-radius: 5px;
+                    color: rgb(128, 123, 123);
+                    border: solid 1px rgb(128, 123, 123);
+                    &:hover{
+                        color: black;
+                        border: solid 1px black;
+                    }
+                }
+            }
+        }
+    }
+}

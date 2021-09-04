@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { RootStateOrAny, useSelector, useDispatch } from 'react-redux'
 import { getDatabase, ref, child, set, get, remove, update } from "firebase/database";
+import {ReactComponent as Mail} from '../../images/mail.svg';
 import { getAuth, signOut } from "firebase/auth";
 import {Link} from "react-router-dom";
 import {logOut} from '../../redux/action'
@@ -9,10 +10,16 @@ import * as _ from 'lodash'
 import styles from './header.module.scss'
 
 const Header = () => {
+    const dispatch = useDispatch()
     const db = getDatabase();
     const dbRef = ref(db);
     const [nicknames, setNicknames] = useState([]);
     const [headerInput, setHeaderInput] = useState('')
+    const [userMenuShow, setUserMenuShow] = useState(false)
+
+    const user = useSelector((state: RootStateOrAny) => {
+        return state.auth.currentUser
+    })
 
     useEffect(() => {
         get(child(dbRef, 'nicknames/')).then((snapshot) => {
@@ -26,17 +33,6 @@ const Header = () => {
             console.error(error);
         });
     }, [])
-
-    const user = useSelector((state: RootStateOrAny) => {
-        return state.auth.currentUser.userId
-    })
-
-    const userName = useSelector((state: RootStateOrAny) => {
-        return state.auth.currentUser.userName
-    })
-
-    const [userMenuShow, setUserMenuShow] = useState(false)
-    const dispatch = useDispatch()
 
     const userMenuHandler = () => {
         setUserMenuShow(() => {
@@ -64,6 +60,7 @@ const Header = () => {
             // An error happened.
         });
     }
+    
     const onHeaderInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setHeaderInput(e.currentTarget.value)
     }
@@ -73,13 +70,14 @@ const Header = () => {
             <div className={styles.logo}>BIOME</div>
             <div className={styles.right}>
                 <input value={headerInput} onChange={(e) => onHeaderInputChange(e)} placeholder='Type a nickname' className={styles.headerSearch}/>
+                <Link to={`/account/${user.userName}/messages`}><Mail className={styles.headerMail}/></Link>
                 {headerInput && renderSearchresult()}
-                {user
+                {user.userId
                     ?
                     <div className={styles.headerUser}>
-                        <div className={styles.headerUserName} onClick={() => userMenuHandler()}>{userName}</div>
+                        <div className={styles.headerUserName} onClick={() => userMenuHandler()}>{user.userName}</div>
                         {userMenuShow && <div className={styles.headerUserMenu}>
-                            <Link to={'/account/' + userName} onClick={() => setUserMenuShow(false)}>Profile</Link>
+                            <Link to={'/account/' + user.userName} onClick={() => setUserMenuShow(false)}>Profile</Link>
                             <div>Settings</div>
                             <div onClick={() => exit()}>Log out</div>
                         </div>}
