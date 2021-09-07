@@ -1,12 +1,9 @@
 import { LOG_OUT, AUTH_SUCCESS } from "./constants";
 
-export const saveUser = (userId: any, userName: any) => {
+export const saveUser = (userInfo: object) => {
     return {
         type: AUTH_SUCCESS,
-        payload: {
-            userId,
-            userName
-        }
+        payload: userInfo
     }
 }
 

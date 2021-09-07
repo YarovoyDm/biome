@@ -8,24 +8,24 @@ var cn = require('classnames');
 
 const Messages = (props: any) => {
     const user = useSelector((state: RootStateOrAny) => {
-        return state.auth.currentUser.userName
+        return state.auth.currentUser
     })
     const db = getDatabase();
     const dbRef = ref(db);
 
-    const [userChats, setUserChats] = useState<any[]>([])
+    const [userChats, setUserChats] = useState({})
     const [chatWith, setChatWith] = useState('')
+    const [chatWithName, setChatWithName] = useState('')
     const [chatInput, setChatInput] = useState('')
     const [messages, setMessages] = useState<any>({
-        message: '',
-        date: '',
-        author: ''
+        
     })
 
     useEffect(() => {
-        get(child(dbRef, `users/${props.match.params.nick}/followed`)).then((snapshot) => {
+        get(child(dbRef, `users/${user.id}/chats/`)).then((snapshot) => {
             if (snapshot.exists()) {
-                setUserChats(_.values(snapshot.val()))
+                console.log('aaa', snapshot.val())
+                setUserChats(snapshot.val())
             } else {
                 console.log("No data available");
             }
@@ -33,21 +33,31 @@ const Messages = (props: any) => {
             console.error(error);
         });
         setChatWith(window.localStorage.getItem('chatWith') || '')
+        setChatWithName(window.localStorage.getItem('chatWithName') || '')
+        // console.log('1', chatWith)
+        // const messagesRef = ref(db, `users/${user.id}/chats/${chatWith + '_' + chatWithName}/messages`);
+        // onValue(messagesRef, (snapshot) => {
+        //     console.log('2', messagesRef)
+        //     setMessages(snapshot.val());
+        // });
     }, [])
 
     useEffect(() => {
-        const messagesRef = ref(db, `users/${user}/chats/${chatWith}`);
-        onValue(messagesRef, (snapshot) => {
+        const messagesRef = ref(db, `users/${user.id}/chats/${chatWith + '_' + chatWithName}/messages`);
+        console.log('1', chatWith, chatWithName)
+        chatWith && onValue(messagesRef, (snapshot) => {
             setMessages(snapshot.val());
         });
     }, [chatInput, chatWith])
 
     const renderChats = () => {
-        return _.map(userChats, chat => {
+        return _.map(userChats, (chat, key) => {
             return <div className={styles.chatItem} onClick={() => {
-                setChatWith(chat)
-                window.localStorage.setItem('chatWith', chat)
-            }}>{chat}</div>
+                setChatWith(key.split('_')[0])
+                setChatWithName(key.split('_')[1])
+                window.localStorage.setItem('chatWith', key.split('_')[0])
+                window.localStorage.setItem('chatWithName', key.split('_')[1])
+            }}>{key.split('_')[1]}</div>
         })
     }
 
@@ -56,27 +66,31 @@ const Messages = (props: any) => {
     }
 
     const sendMessage = () => {
-        update(ref(db, `users/${user}/chats/${chatWith}/${Date.now()}`),
+        chatInput &&
+        update(ref(db, `users/${user.id}/chats/${chatWith + '_' + chatWithName}/messages/${Date.now()}`),
             {
                 message: chatInput,
                 date: Date.now(),
-                author: props.match.params.nick
+                author: user.displayName
             }
         );
-        update(ref(db, `users/${chatWith}/chats/${user}/${Date.now()}`),
+        chatInput &&
+        update(ref(db, `users/${chatWith}/chats/${user.id + '_' + user.displayName}/messages/${Date.now()}`),
             {
                 message: chatInput,
                 date: Date.now(),
-                author: user
+                author: user.displayName
             }
         );
         setChatInput('')
     }
 
     const renderMessage = () => {
+        if(!messages){return null}
         ///console.log('mess', _.sortBy(messages, [(o) =>  { return -o.date }])) !!! Important problem
         return _.map(_.sortBy(messages, [(date) => { return -date.date }]), message => {
-            return <div className={cn(styles.messageBlock, { [styles.messageBlockIncoming]: message.author !== user })}>
+            console.log('mess', message)
+            return <div className={cn(styles.messageBlock, { [styles.messageBlockIncoming]: message.author !== user.displayName })}>
                 <div className={styles.messageWrapper}>
                     {/* <div className={styles.messageDate}>{moment(message.date).startOf('hour').fromNow()}</div> */}
                     <div className={styles.messageText}>{message.message}</div>

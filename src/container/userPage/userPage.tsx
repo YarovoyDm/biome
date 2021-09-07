@@ -2,66 +2,71 @@ import React, { useEffect, useState } from 'react'
 import { RootStateOrAny, useSelector } from 'react-redux'
 import { RouteComponentProps } from 'react-router-dom';
 import { getDatabase, ref, child, set, get, remove, update } from "firebase/database";
+import {ReactComponent as MenuIcon} from '../../images/menuIcon.svg';
 import * as _ from 'lodash'
 import { Link } from "react-router-dom";
 import styles from './userPage.module.scss'
 import Article from '../../components/article/article';
 
 interface IUserPageState extends RouteComponentProps<any> {
-    articlePopupIsOpen: string,
+    articlePopupIsOpen: Boolean,
     inputsState:{
         articleTitle: string,
         articleText: string,
     },
-    popupFor: Boolean,
+    popupFor: string,
     userInfo: {
         displayName: string,
         id: string,
         followers: object,
         followed: object,
-        articles: object
+        articles: object,
+        blockedUsers: object
     },
-    itsNotMe: Boolean,
-    currentUserAlreadyFollowed: Boolean
+    currentUserAlreadyFollowed: Boolean,
+    userMenuIsOpen: Boolean
 }
 
-const UserPage: React.FC<IUserPageState> = (props: any) => {
-    const [inputsState, setInputsState] = useState({
+const UserPage: React.FC = (props: any) => {
+    const user = useSelector((state: RootStateOrAny) => {
+        return state.auth.currentUser
+    })  
+    const [userMenuIsOpen, setUserMenuIsOpen] = useState<IUserPageState['userMenuIsOpen']>(false)
+    const [inputsState, setInputsState] = useState<IUserPageState['inputsState']>({
         articleTitle: '',
         articleText: '',
     })
-    const [articlePopupIsOpen, setArticlePopupIsOpen] = useState(false)
-    const [popupFor, setPopupFor] = useState('')
-    const [userInfo, setUserInfo] = useState({
+    const [articlePopupIsOpen, setArticlePopupIsOpen] = useState<IUserPageState['articlePopupIsOpen']>(false)
+    const [popupFor, setPopupFor] = useState<IUserPageState['popupFor']>('')
+    const [userInfo, setUserInfo] = useState<IUserPageState['userInfo']>({
         displayName: '',
         id: '',
         followers: {},
         followed: {},
-        articles: []
+        articles: [],
+        blockedUsers: []
     })
-    const [currentUserAlreadyFollowed, setCurrentUserAlreadyFollowed] = useState(false)
-
-    const userNameLocal = window.localStorage.getItem('userName')
-    const userIdLocal: any = window.localStorage.getItem('userID')
-    const nickFromUrl = props.match.params.nick
+    const [currentUserAlreadyFollowed, setCurrentUserAlreadyFollowed] = useState<IUserPageState['currentUserAlreadyFollowed']>(false)
+    const idFromUrl = props.match.params.id
     const db = getDatabase();
     const dbRef = ref(db);
-    const isMe = userNameLocal === nickFromUrl
+    const isMe = user.displayName === userInfo.displayName
 
     useEffect(() => {
-        get(child(dbRef, `users/${userNameLocal}/followed`)).then((snapshot) => {
+        get(child(dbRef, `users/${user.displayName}/followed`)).then((snapshot) => {
             if (snapshot.exists()) {
-                setCurrentUserAlreadyFollowed(_.values(snapshot.val()).includes(nickFromUrl))
+                setCurrentUserAlreadyFollowed(_.values(snapshot.val()).includes(userInfo.displayName))
             } else {
                 console.log("No data available");
             }
         }).catch((error) => {
             console.error(error);
         });
+        
     }, [])
 
     useEffect(() => {
-        get(child(dbRef, `users/${nickFromUrl}`)).then((snapshot) => {
+        get(child(dbRef, `users/${idFromUrl}`)).then((snapshot) => {
             if (snapshot.exists()) {
                 setUserInfo(snapshot.val())
             } else {
@@ -70,20 +75,24 @@ const UserPage: React.FC<IUserPageState> = (props: any) => {
         }).catch((error) => {
             console.error(error);
         });
+    
+        // if(_.includes(userInfo.articles, userNameLocal)){
+
+        // }
     })
 
     const followHandler = (isFollow: Boolean) => {
         if(isFollow){
-            update(ref(db, `users/${nickFromUrl}/followers`), {
-                [userIdLocal]: userNameLocal
+            update(ref(db, `users/${userInfo.id}/followers`), {
+                [user.id]: user.displayName
             });
-            update(ref(db, `users/${userNameLocal}/followed`), {
-                [userInfo.id]: nickFromUrl
+            update(ref(db, `users/${user.id}/followed`), {
+                [userInfo.id]: userInfo.displayName
             });
             setCurrentUserAlreadyFollowed(true)
         }else{
-            remove(ref(db, `users/${nickFromUrl}/followers/${userIdLocal}`));
-            remove(ref(db, `users/${userNameLocal}/followed/${userInfo.id}`));
+            remove(ref(db, `users/${userInfo.id}/followers/${user.id}`));
+            remove(ref(db, `users/${user.id}/followed/${userInfo.id}`));
             setCurrentUserAlreadyFollowed(false)
         }
     }
@@ -109,7 +118,7 @@ const UserPage: React.FC<IUserPageState> = (props: any) => {
     }
 
     const saveArticle = () => {
-        set(ref(db, `users/${userNameLocal}/articles/${inputsState.articleTitle}`), {
+        set(ref(db, `users/${user.id}/articles/${inputsState.articleTitle}`), {
             text: inputsState.articleText,
             date: Date.now(),
             name: inputsState.articleTitle
@@ -150,19 +159,19 @@ const UserPage: React.FC<IUserPageState> = (props: any) => {
     const renderFollowInfoPopup = () => {
         let data = null
         if (popupFor === 'followers') {
-            data = userInfo.followers ? _.values(userInfo.followers) : []
+            data = userInfo.followers ? userInfo.followers : []
         }
         if (popupFor === 'followed') {
-            data = userInfo.followed ? _.values(userInfo.followed) : []
+            data = userInfo.followed ? userInfo.followed : []
         }
         return <div className={styles.popup}>
             <div className={styles.popupHeader}>
                 <div className={styles.popupClose} onClick={() => setPopupFor('')}>X</div>
             </div>
-            {_.map(data, (item: string) => {
+            {_.map(data, (item: string, key) => {
                 return <div className={styles.followPopupUser}>
                     <div className={styles.followPopupUserPhoto}></div>
-                    <Link className={styles.followPopupUserName} to={`/account/${item}`}>{item}</Link>
+                    <Link className={styles.followPopupUserName} to={`/account/${key}`}>{item}</Link>
                 </div>
             })}
         </div>
@@ -175,7 +184,7 @@ const UserPage: React.FC<IUserPageState> = (props: any) => {
         return _.map(userInfo.articles as any, article => {
             return <Article 
                 isMe={isMe}
-                userName={nickFromUrl}
+                userName={userInfo.displayName}
                 articleTitle={article.name}
                 articleText={article.text}
                 articleComments={0}
@@ -185,30 +194,68 @@ const UserPage: React.FC<IUserPageState> = (props: any) => {
         })
     }
 
+    const goToChat = () => {
+        window.localStorage.setItem('chatWith', idFromUrl)
+        update(ref(db, `users/${user.id}/chats/`), {
+            [userInfo.id]: idFromUrl
+        });
+    }
+
+    const blockUser = () => {
+        update(ref(db, `users/${user.id}/blockedUsers/`), {
+            [idFromUrl]: true
+        });
+    }
+
+    const sendmessageButton = () => {
+        window.localStorage.setItem('chatWith', userInfo.id)
+        window.localStorage.setItem('chatWithName', userInfo.displayName)
+        update(ref(db, `users/${user.id}/chats/${userInfo.id + '_' + userInfo.displayName}`), {
+            temporaryChat: true
+        });
+    }
+
     return (
         <div>
             <div className={styles.userMain}>
                 {articlePopupIsOpen && renderNewArticlePopup()}
                 <div className={styles.userBlock}>
-                    <div className={styles.userPhoto}></div>
-                    <div className={styles.userInfo}>
-                        <div className={styles.userName}>@{nickFromUrl}</div>
-                        <div className={styles.userInfoActivity}>
-                            {popupFor && renderFollowInfoPopup()}
-                            <div className={styles.userPosts}>{userInfo.articles ?  _.size(userInfo.articles) : 0} Posts</div>
-                            <div
-                                onClick={() => setPopupFor('followers')}
-                                className={styles.userFollowers}
-                            >
-                                {userInfo.followers ? _.size(userInfo.followers) : 0} Followers
+                    <div className={styles.userBlockLeft}>
+                        <div className={styles.userPhoto}></div>
+                        <div className={styles.userInfo}>
+                            <div className={styles.userName}>@{userInfo.displayName}</div>
+                            <div className={styles.userInfoActivity}>
+                                {popupFor && renderFollowInfoPopup()}
+                                <div className={styles.userPosts}>{userInfo.articles ?  _.size(userInfo.articles) : 0} Posts</div>
+                                <div
+                                    onClick={() => setPopupFor('followers')}
+                                    className={styles.userFollowers}
+                                >
+                                    {userInfo.followers ? _.size(userInfo.followers) : 0} Followers
+                                </div>
+                                <div className={styles.userFollowed}
+                                    onClick={() => setPopupFor('followed')}
+                                >
+                                    {userInfo.followed ? _.size(userInfo.followed) : 0} Followed
+                                </div>
                             </div>
-                            <div className={styles.userFollowed}
-                                onClick={() => setPopupFor('followed')}
-                            >
-                                {userInfo.followed ? _.size(userInfo.followed) : 0} Followed
+                            <div className={styles.userButtonsWrapper}>
+                                {renderFollowButton()}
+                                {!isMe && <Link to={`/account/${user.id}/messages`} onClick={() => {
+                                    sendmessageButton()
+                                }} className={styles.userInfoButton}>Send a message</Link>}
                             </div>
                         </div>
-                        {renderFollowButton()}
+                    </div>
+                    <div className={styles.userMenuBlock}>
+                        {! isMe && <div className={styles.userMenuWrapper} onClick={() => {
+                            setUserMenuIsOpen(!userMenuIsOpen)
+                        }}>
+                            <MenuIcon className={styles.menuIcon}/>
+                        </div>}
+                        {userMenuIsOpen && <div className={styles.articleMenu}>
+                            <div className={styles.articleMenuItem} onClick={() => blockUser()}>Block this user</div> 
+                        </div>}
                     </div>
                 </div>
                 <div className={styles.userArticlesBlock}>

@@ -71,6 +71,7 @@
     margin-bottom: 20px;
     div{
         margin-right: 10px;
+        word-break: break-all;
     }
 }
 
@@ -100,6 +101,7 @@
         }
     }
 }
+
 .articleMenu{
     position: absolute;
     background: white;

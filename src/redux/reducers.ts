@@ -3,8 +3,7 @@ import {combineReducers} from 'redux'
 
 const initialState = {
     currentUser: {
-        userId: '',
-        userName: ''
+        
     }
 }
 
@@ -14,9 +13,7 @@ const authReducer = (state=initialState, action: any) => {
             return {
                 ...state, 
                 currentUser: {
-                    ...state.currentUser,
-                    userId: action.payload.userId,
-                    userName: action.payload.userName
+                    ...action.payload
                 }
             }
         case LOG_OUT: 

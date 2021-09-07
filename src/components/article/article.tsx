@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import { getDatabase, ref, remove, update } from "firebase/database";
 import cn from 'classnames'
+import { RootStateOrAny, useSelector } from 'react-redux'
 
 import {ReactComponent as MenuIcon} from '../../images/menuIcon.svg';
 import {ReactComponent as Like} from '../../images/like.svg';
@@ -21,6 +22,9 @@ interface IArticle  {
 
 const Article: React.FC<IArticle> = (props) => {
     const userNameLocal = window.localStorage.getItem('userName')
+    const user = useSelector((state: RootStateOrAny) => {
+        return state.auth.currentUser
+    })  
     const db = getDatabase();
     const [articleMenuIsOpen, setArticleMenuIsOpen] = useState(false)
 
@@ -31,7 +35,7 @@ const Article: React.FC<IArticle> = (props) => {
     }
 
     const removeArticle = () => {
-        remove(ref(db, `users/${userNameLocal}/articles/${props.articleTitle}`))
+        remove(ref(db, `users/${user.id}/articles/${props.articleTitle}`))
         setArticleMenuIsOpen(false)
     }
 

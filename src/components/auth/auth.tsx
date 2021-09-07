@@ -1,8 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { getDatabase, ref, set, child, get } from "firebase/database";
+import { RouteComponentProps } from 'react-router-dom';
+import { getDatabase, ref, set, child, get, update } from "firebase/database";
 import { connect, useDispatch } from 'react-redux'
 import { saveUser } from '../../redux/action'
+import * as _ from 'lodash'
 
 import styles from './auth.module.scss'
 
@@ -19,27 +21,54 @@ const Auth: React.FC = () => {
             name: ''
         }
     })
+    const [nicknames, setNicknames] = useState<any[]>([])
     const {loginInputs, signUpInputs} = authInputs
     const [isSignUp, setIsSignUp] = useState(false)
     const dispatch = useDispatch()
 
+    const db = getDatabase();
+    const dbRef = ref(db);
+
+    useEffect(() => {
+        get(child(dbRef, 'nicknames/')).then((snapshot) => {
+            if (snapshot.exists()) {
+                setNicknames(snapshot.val())
+            } else {
+                console.log("No data available");
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+    },[])
+
     const signUp = () => {
         const auth = getAuth();
         const db = getDatabase();
-        signUpInputs.password === signUpInputs.repeatPassword
+        const isNickExist = _.includes(nicknames, signUpInputs.name)
+        const isPasswordMatch = signUpInputs.password === signUpInputs.repeatPassword
+        isPasswordMatch && !isNickExist
             ?
             createUserWithEmailAndPassword(auth, signUpInputs.email, signUpInputs.password)
                 .then((userCredential) => {
                     const user = userCredential.user;
 
-                    set(ref(db, 'users/' + signUpInputs.name), {
+                    set(ref(db, 'users/' + user.uid), {
                         email: signUpInputs.email,
                         displayName: signUpInputs.name,
-                        id: user.uid
+                        id: user.uid,
+                        accountType: 'public'
                     });
-                    set(ref(db, '/nicknames'), [
-                        signUpInputs.name
-                    ]);
+                    dispatch(saveUser({
+                        email: signUpInputs.email,
+                        displayName: signUpInputs.name,
+                        id: user.uid,
+                        accountType: 'public'
+                    }))
+                    console.log('1')
+                    update(ref(db, '/nicknames'), {
+                        [signUpInputs.name]: user.uid
+                    });
+                    console.log('2')
                     setAuthInputs((prev) => ({
                         ...prev,
                         signUpInputs:{
@@ -49,13 +78,14 @@ const Auth: React.FC = () => {
                             name: ''
                         }
                     }))
-                    dispatch(saveUser(user.uid, signUpInputs.name))
+                    console.log('3')
+                    // dispatch(saveUser(user.uid, signUpInputs.name))
                     window.localStorage.setItem('userID', user.uid)
                     window.localStorage.setItem('userName', signUpInputs.name)
                 })
                 .catch((error) => {
                     const errorCode = error.code;
-                    const errorMessage = error.message;
+                    console.log(error.message)
                 })
             : alert('Password do not match')
     }
@@ -66,7 +96,7 @@ const Auth: React.FC = () => {
             .then((userCredential) => {
                 const user = userCredential.user;
                 const dbRef = ref(getDatabase());
-                get(child(dbRef, `users/${signUpInputs.name}`)).then((snapshot) => {
+                get(child(dbRef, `users/${user.uid}`)).then((snapshot) => {
                     if (snapshot.exists()) {
                         setAuthInputs((prev) => ({
                             ...prev,
@@ -75,9 +105,9 @@ const Auth: React.FC = () => {
                                 password: ''
                             }
                         }))
-                        dispatch(saveUser(user.uid, snapshot.val().displayName))
-                        window.localStorage.setItem('userID', user.uid)
-                        window.localStorage.setItem('userName', snapshot.val().displayName)
+                        dispatch(saveUser(snapshot.val()))
+                        // window.localStorage.setItem('userID', user.uid)
+                        // window.localStorage.setItem('userName', snapshot.val().displayName)
                     } else {
                         console.log("No data available");
                     }

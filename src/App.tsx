@@ -12,26 +12,47 @@ import { useDispatch } from 'react-redux'
 import {withRouter} from 'react-router'
 import UserPage from './container/userPage/userPage';
 import {PublicRoute, PrivateRoute} from './routeComponents'
-import Chat from './container/chat/chat';
 import Messages from './container/messages/messages';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import * as _ from 'lodash'
+import { getDatabase, ref, child, set, get, remove, update } from "firebase/database";
 
 function App() {
   const dispatch = useDispatch()
+  const auth = getAuth();
+  const db = getDatabase();
+  const dbRef = ref(db);
 
   useEffect(() => {
-    const userIdLocal = window.localStorage.getItem('userID')
-    const userNameLocal = window.localStorage.getItem('userName')
-    dispatch(saveUser(userIdLocal, userNameLocal))
+    // const localData = window.localStorage.getItem('userID')
+    // saveUser({id: localData})
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const uid = user.uid;
+        get(child(dbRef, `users/${uid}`)).then((snapshot) => {
+          if (snapshot.exists()) {
+            dispatch(saveUser(snapshot.val()))
+          } else {
+              console.log("No data available");
+          }
+      }).catch((error) => {
+          console.error(error);
+      });
+      } else {
+        console.log('gg')
+        // ...
+      }
+    });
   })
 
   return (
     <div>
       <Header />
       <Switch>
-        <Route exact={true} path='/feed' component={Feed} />
+        {/* <Route exact={true} path='/feed' component={Feed} /> */}
         <PrivateRoute path='/account/:nick/messages' component={Messages} />
-        <PublicRoute restricted={true} path='/auth' component={withRouter(AuthPage)} />
-        <PrivateRoute path='/account/:nick' component={withRouter(UserPage)} />
+        <PublicRoute path='/auth' component={withRouter(AuthPage)} />
+        <PrivateRoute path='/account/:id' component={withRouter(UserPage)} />
       </Switch>
     </div>
   );

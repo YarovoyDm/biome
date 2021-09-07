@@ -2,27 +2,25 @@ import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { RootStateOrAny, useSelector } from 'react-redux'
 
-export const PublicRoute: React.FC<any> = ({component: Component, ...rest}) => {
-    const user = useSelector((state: RootStateOrAny) => {
-        return state.auth.currentUser.userName
-    })  
+export const PublicRoute: React.FC<any> = ({component: Component, restricted,  ...rest}) => {
+    const userID = window.localStorage.getItem('userID')
+
     return (
         <Route {...rest} render={props => (
-            user ?
+            userID && restricted ?
+                <Redirect to={`/account/${userID}`} />
+                :
                 <Component {...props} />
-            : <Redirect to="/auth" />
         )} />
     );
 };
 
 export const PrivateRoute: React.FC<any> = ({component: Component, restricted, ...rest}) => {
-    const user = useSelector((state: RootStateOrAny) => {
-        return state.auth.currentUser.userName
-    })  
+    const userID = window.localStorage.getItem('userID')
     return (
         <Route {...rest} render={props => (
-            user && restricted ?
-                <Redirect to={`/account/${user}`} />
+            !userID ?
+                <Redirect to={`/auth`} />
             : <Component {...props} />
         )} />
     );

@@ -1,12 +1,12 @@
 .userInfoButton{
     min-width: 100px;
-    max-width: 150px;
     height: 30px;
     border: solid 1px rgb(128, 123, 123);
     text-align: center;
     line-height: 30px;
     border-radius: 5px;
     color: rgb(128, 123, 123);
+    padding: 0px 15px;
     cursor: pointer;
     &:hover{
         color: black;
@@ -16,6 +16,7 @@
 .userMain{
     display: flex;
     flex-direction: column;
+    fill:rgb(128, 123, 123)
 }
 .userPhoto{
     width: 150px;
@@ -27,9 +28,56 @@
 .userBlock{
     display: flex;
     align-items: center;
+    justify-content: space-between;
     width: 60%;
     border-bottom: solid 1px rgb(128, 123, 123);
     padding-bottom: 30px;
+    .userBlockLeft{
+        width: 60%;
+        display: flex;
+    }
+    .userMenuWrapper{
+        display: flex;
+        width: 30px;
+        height: 30px;
+        border-radius: 30px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        &:hover{
+            background: #ccc;
+            .menuIcon{
+                fill: black
+            }
+        }
+        .menuIcon{
+            width: 15px;
+            height: 35px;
+        }
+    }
+}
+.articleMenu{
+    position: absolute;
+    background: white;
+    border-radius: 5px;
+    padding: 10px;
+    top: 30px;
+    right: 0px;
+    width: 150px;
+    height: 100px;
+    border: solid 1px rgb(128, 123, 123);
+}
+
+.userMenuBlock{
+    position: relative;
+}
+
+.articleMenuItem{
+    color: rgb(128, 123, 123);
+    cursor: pointer;
+    &:hover{
+        color: black;
+    }
 }
 .userName{
     font-size: 20px;
@@ -165,6 +213,15 @@
                 border: solid 1px black;
             }
         }
+    }
+}
+
+.userButtonsWrapper{
+    display: flex;
+    justify-content: flex-start;
+    .userInfoButton:nth-child(2n){
+        margin-left: 20px;
+        text-decoration: none;
     }
 }
 

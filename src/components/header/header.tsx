@@ -13,7 +13,9 @@ const Header = () => {
     const dispatch = useDispatch()
     const db = getDatabase();
     const dbRef = ref(db);
-    const [nicknames, setNicknames] = useState([]);
+    const [nicknames, setNicknames] = useState({
+        nick: ''
+    });
     const [headerInput, setHeaderInput] = useState('')
     const [userMenuShow, setUserMenuShow] = useState(false)
 
@@ -24,7 +26,6 @@ const Header = () => {
     useEffect(() => {
         get(child(dbRef, 'nicknames/')).then((snapshot) => {
             if (snapshot.exists()) {
-                console.log('asdasd', snapshot.val())
                 setNicknames(snapshot.val())
             } else {
                 console.log("No data available");
@@ -41,12 +42,18 @@ const Header = () => {
     }
 
     const renderSearchresult = () => {
-        const result = _.filter(nicknames, nick => {
+        const result = _.filter(_.keys(nicknames), nick => {
             return _.startsWith(nick, headerInput)
         }) 
+        console.log('nick', nicknames)
         return <div className={styles.headerSearchResult}>
             {_.map(result, nick => {
-                return <Link to={`/account/${nick}`} onClick={() => setHeaderInput('')}>{nick}</Link>
+                console.log(nick)
+                return <Link 
+                    className={styles.headerSearchItem} 
+                    to={`/account/${_.get(nicknames, nick)}`} 
+                    onClick={() => setHeaderInput('')}
+                >{nick}</Link>
             })}
         </div>
     }
@@ -60,7 +67,7 @@ const Header = () => {
             // An error happened.
         });
     }
-    
+
     const onHeaderInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setHeaderInput(e.currentTarget.value)
     }
@@ -69,15 +76,24 @@ const Header = () => {
         <header>
             <div className={styles.logo}>BIOME</div>
             <div className={styles.right}>
-                <input value={headerInput} onChange={(e) => onHeaderInputChange(e)} placeholder='Type a nickname' className={styles.headerSearch}/>
-                <Link to={`/account/${user.userName}/messages`}><Mail className={styles.headerMail}/></Link>
+                <input 
+                    value={headerInput} 
+                    onChange={(e) => onHeaderInputChange(e)} 
+                    placeholder='Type a nickname' 
+                    className={styles.headerSearch}
+                />
+                <Link to={`/account/${user.id}/messages`}>
+                    <Mail className={styles.headerMail}/>
+                </Link>
                 {headerInput && renderSearchresult()}
-                {user.userId
+                {user.id
                     ?
                     <div className={styles.headerUser}>
-                        <div className={styles.headerUserName} onClick={() => userMenuHandler()}>{user.userName}</div>
+                        <div className={styles.headerUserName} onClick={() => userMenuHandler()}>
+                            {user.displayName}
+                        </div>
                         {userMenuShow && <div className={styles.headerUserMenu}>
-                            <Link to={'/account/' + user.userName} onClick={() => setUserMenuShow(false)}>Profile</Link>
+                            <Link to={'/account/' + user.id} onClick={() => setUserMenuShow(false)}>Profile</Link>
                             <div>Settings</div>
                             <div onClick={() => exit()}>Log out</div>
                         </div>}
