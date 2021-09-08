@@ -79,24 +79,24 @@ const data = [
 
 const Feed = () => {
 
-    const renderArticles = () => {
-        return _.map(data, item => {
-            return <Article 
-                isMe={false}
-                userName={item.userName}
-                articleTitle={item.articleTitle}
-                articleText={item.articleText}
-                articleLikes={item.articleLikes}
-                articleComments={item.articleComments}
-                articleViews={item.articleViews}
-            />
-        })
-    }
+    // const renderArticles = () => {
+    //     return _.map(data, item => {
+    //         return <Article 
+    //             isMe={false}
+    //             userName={item.userName}
+    //             articleTitle={item.articleTitle}
+    //             articleText={item.articleText}
+    //             articleLikes={item.articleLikes}
+    //             articleComments={item.articleComments}
+    //             articleViews={item.articleViews}
+    //         />
+    //     })
+    // }
 
     return (
         <div className={styles.feed}>
             <div className={styles.feedMain}>
-                {renderArticles()}
+                {/* {renderArticles()} */}
             </div>
         </div>
     )

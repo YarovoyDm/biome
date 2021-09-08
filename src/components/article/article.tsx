@@ -1,5 +1,6 @@
 import React, {useState} from 'react'
 import { getDatabase, ref, remove, update } from "firebase/database";
+import * as _ from 'lodash'
 import cn from 'classnames'
 import { RootStateOrAny, useSelector } from 'react-redux'
 
@@ -14,10 +15,11 @@ interface IArticleProps  {
     userName: string,
     articleTitle: string,
     articleText: string,
-    articleLikes: number,
+    articleLikes: object,
     articleComments: number,
     articleViews: number,
-    isMe: Boolean
+    isMe: Boolean,
+    idFromUrl?: string
 }
 
 interface IArticleState {
@@ -26,17 +28,20 @@ interface IArticleState {
 
 const Article: React.FC<IArticleProps> = (props) => {
     const [articleMenuIsOpen, setArticleMenuIsOpen] = useState<IArticleState['articleMenuIsOpen']>(false)
-
-    const userNameLocal = window.localStorage.getItem('userName')
     const user = useSelector((state: RootStateOrAny) => {
         return state.auth.currentUser
     })  
     const db = getDatabase();
+    const isILiked = _.includes(_.keys(props.articleLikes), user.id)
 
     const addLike = () => {
-        update(ref(db, `users/${props.userName}/articles/${props.articleTitle}/likes/`), {
-            [userNameLocal as string]: Date.now()
-        });
+        isILiked 
+        ?
+        remove(ref(db, `users/${props.idFromUrl}/articles/${props.articleTitle}/likes/${user.id}`))
+        : 
+        update(ref(db, `users/${props.idFromUrl}/articles/${props.articleTitle}/likes`), {
+            [user.id]: user.displayName
+        })
     }
 
     const removeArticle = () => {
@@ -70,8 +75,8 @@ const Article: React.FC<IArticleProps> = (props) => {
             </div>
             <div className={styles.articleFooter}>
                 <div className={styles.articleLikes} onClick={() => addLike()}>
-                    <Like className={cn(styles.articleSvg, styles.articleLike)}/> 
-                    {props.articleLikes}
+                    <Like className={cn(styles.articleSvg, styles.articleLike, isILiked && styles.likeActive)}/> 
+                    {_.size(props.articleLikes)}
                 </div>
                 <div className={styles.articleComments}>
                     <Comment className={styles.articleSvg}/> 

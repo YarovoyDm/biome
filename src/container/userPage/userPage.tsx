@@ -176,24 +176,25 @@ const UserPage: React.FC = (props: any) => {
                 key={article.name}
                 isMe={isMe}
                 userName={userGuestInfo.displayName}
+                idFromUrl={idFromUrl}
                 articleTitle={article.name}
                 articleText={article.text}
                 articleComments={0}
-                articleLikes={0}
+                articleLikes={article.likes}
                 articleViews={0}
             />
         })
     }
 
-    const blockUser = () => {
-        update(ref(db, `users/${user.id}/blockedUsers/`), {
-            [idFromUrl]: true
-        });
-        setUserMenuIsOpen(false)
-    }
-
-    const unBlockUser = () => {
-        remove(ref(db, `users/${user.id}/blockedUsers/${idFromUrl}`))
+    const blockUserHandler = (type: string) => {
+        if(type === 'block'){
+            update(ref(db, `users/${user.id}/blockedUsers/`), {
+                [idFromUrl]: true
+            });
+        }
+        if(type === 'unblock'){
+            remove(ref(db, `users/${user.id}/blockedUsers/${idFromUrl}`))
+        }
         setUserMenuIsOpen(false)
     }
 
@@ -245,8 +246,8 @@ const UserPage: React.FC = (props: any) => {
                         </div>}
                         {userMenuIsOpen && <div className={styles.articleMenu}>
                             {!isGuestBannedByMe 
-                                ? <div className={styles.articleMenuItem} onClick={() => blockUser()}>Block this user</div>
-                                : <div className={styles.articleMenuItem} onClick={() => unBlockUser()}>Unblock this user</div>
+                                ? <div className={styles.articleMenuItem} onClick={() => blockUserHandler('block')}>Block this user</div>
+                                : <div className={styles.articleMenuItem} onClick={() => blockUserHandler('unblock')}>Unblock this user</div>
                             }
                         </div>}
                     </div>
