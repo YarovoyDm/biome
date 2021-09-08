@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react'
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { getDatabase, ref, set, child, get } from "firebase/database";
-
+import React, { useEffect } from 'react'
+import { getDatabase, ref, child, get } from "firebase/database";
+import Auth from '../../components/auth/auth';
 
 import styles from './loginPage.module.scss'
-import Auth from '../../components/auth/auth';
 
 const AuthPage: React.FC = () => {
     useEffect(() => {

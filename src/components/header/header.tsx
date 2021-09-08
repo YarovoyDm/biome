@@ -1,24 +1,33 @@
 import React, { useState, useEffect } from 'react'
 import { RootStateOrAny, useSelector, useDispatch } from 'react-redux'
-import { getDatabase, ref, child, set, get, remove, update } from "firebase/database";
-import {ReactComponent as Mail} from '../../images/mail.svg';
+import { getDatabase, ref, child, get } from "firebase/database";
 import { getAuth, signOut } from "firebase/auth";
 import {Link} from "react-router-dom";
-import {logOut} from '../../redux/action'
 import * as _ from 'lodash'
+import {logOut} from '../../redux/action'
+
+import {ReactComponent as Mail} from '../../images/mail.svg';
 
 import styles from './header.module.scss'
 
-const Header = () => {
+interface IHeader {
+    nicknames: {
+        nick: string
+    },
+    headerInput: string,
+    userMenuShow: Boolean
+}
+
+const Header:React.FC = () => {
+    const [nicknames, setNicknames] = useState<IHeader['nicknames']>({
+        nick: ''
+    });
+    const [headerInput, setHeaderInput] = useState<IHeader['headerInput']>('')
+    const [userMenuShow, setUserMenuShow] = useState<IHeader['userMenuShow']>(false)
+
     const dispatch = useDispatch()
     const db = getDatabase();
     const dbRef = ref(db);
-    const [nicknames, setNicknames] = useState({
-        nick: ''
-    });
-    const [headerInput, setHeaderInput] = useState('')
-    const [userMenuShow, setUserMenuShow] = useState(false)
-
     const user = useSelector((state: RootStateOrAny) => {
         return state.auth.currentUser
     })
@@ -45,11 +54,10 @@ const Header = () => {
         const result = _.filter(_.keys(nicknames), nick => {
             return _.startsWith(nick, headerInput)
         }) 
-        console.log('nick', nicknames)
         return <div className={styles.headerSearchResult}>
             {_.map(result, nick => {
-                console.log(nick)
                 return <Link 
+                    key={nick}
                     className={styles.headerSearchItem} 
                     to={`/account/${_.get(nicknames, nick)}`} 
                     onClick={() => setHeaderInput('')}

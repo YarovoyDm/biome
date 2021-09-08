@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { RootStateOrAny, useSelector } from 'react-redux'
-import { RouteComponentProps } from 'react-router-dom';
-import { getDatabase, ref, child, set, get, remove, update } from "firebase/database";
-import {ReactComponent as MenuIcon} from '../../images/menuIcon.svg';
+import { getDatabase, ref, child, set, get, remove, update, onValue } from "firebase/database";
 import * as _ from 'lodash'
 import { Link } from "react-router-dom";
-import styles from './userPage.module.scss'
 import Article from '../../components/article/article';
 
-interface IUserPageState extends RouteComponentProps<any> {
+import { ReactComponent as MenuIcon } from '../../images/menuIcon.svg';
+
+import styles from './userPage.module.scss'
+
+
+interface IUserPageState {
     articlePopupIsOpen: Boolean,
-    inputsState:{
+    inputsState: {
         articleTitle: string,
         articleText: string,
     },
@@ -30,7 +32,7 @@ interface IUserPageState extends RouteComponentProps<any> {
 const UserPage: React.FC = (props: any) => {
     const user = useSelector((state: RootStateOrAny) => {
         return state.auth.currentUser
-    })  
+    })
     const [userMenuIsOpen, setUserMenuIsOpen] = useState<IUserPageState['userMenuIsOpen']>(false)
     const [inputsState, setInputsState] = useState<IUserPageState['inputsState']>({
         articleTitle: '',
@@ -38,76 +40,64 @@ const UserPage: React.FC = (props: any) => {
     })
     const [articlePopupIsOpen, setArticlePopupIsOpen] = useState<IUserPageState['articlePopupIsOpen']>(false)
     const [popupFor, setPopupFor] = useState<IUserPageState['popupFor']>('')
-    const [userInfo, setUserInfo] = useState<IUserPageState['userInfo']>({
+    const [userGuestInfo, setUserGuestInfo] = useState<IUserPageState['userInfo']>({
         displayName: '',
         id: '',
         followers: {},
         followed: {},
         articles: [],
-        blockedUsers: []
+        blockedUsers: {}
     })
     const [currentUserAlreadyFollowed, setCurrentUserAlreadyFollowed] = useState<IUserPageState['currentUserAlreadyFollowed']>(false)
     const idFromUrl = props.match.params.id
     const db = getDatabase();
-    const dbRef = ref(db);
-    const isMe = user.displayName === userInfo.displayName
+    const isMe = user.displayName === userGuestInfo.displayName
+    let isGuestBanned = _.includes(_.keys(userGuestInfo.blockedUsers), user.id)
+    let isGuestBannedByMe = _.includes(_.keys(user.blockedUsers), idFromUrl)
+    const userRef = ref(db, `users/${idFromUrl}`);
 
     useEffect(() => {
-        get(child(dbRef, `users/${user.displayName}/followed`)).then((snapshot) => {
-            if (snapshot.exists()) {
-                setCurrentUserAlreadyFollowed(_.values(snapshot.val()).includes(userInfo.displayName))
-            } else {
-                console.log("No data available");
-            }
-        }).catch((error) => {
-            console.error(error);
+        setCurrentUserAlreadyFollowed(_.values(user.followed).includes(userGuestInfo.displayName))
+        onValue(userRef, (snapshot) => {
+            setUserGuestInfo(snapshot.val());
         });
-        
     }, [])
 
     useEffect(() => {
-        get(child(dbRef, `users/${idFromUrl}`)).then((snapshot) => {
-            if (snapshot.exists()) {
-                setUserInfo(snapshot.val())
-            } else {
-                console.log("No data available");
-            }
-        }).catch((error) => {
-            console.error(error);
+        onValue(userRef, (snapshot) => {
+            setUserGuestInfo(snapshot.val());
         });
-    
-        // if(_.includes(userInfo.articles, userNameLocal)){
-
-        // }
-    })
+    }, [articlePopupIsOpen, userMenuIsOpen])
 
     const followHandler = (isFollow: Boolean) => {
-        if(isFollow){
-            update(ref(db, `users/${userInfo.id}/followers`), {
+        if (isFollow) {
+            update(ref(db, `users/${userGuestInfo.id}/followers`), {
                 [user.id]: user.displayName
             });
             update(ref(db, `users/${user.id}/followed`), {
-                [userInfo.id]: userInfo.displayName
+                [userGuestInfo.id]: userGuestInfo.displayName
             });
             setCurrentUserAlreadyFollowed(true)
-        }else{
-            remove(ref(db, `users/${userInfo.id}/followers/${user.id}`));
-            remove(ref(db, `users/${user.id}/followed/${userInfo.id}`));
+        } else {
+            remove(ref(db, `users/${userGuestInfo.id}/followers/${user.id}`));
+            remove(ref(db, `users/${user.id}/followed/${userGuestInfo.id}`));
             setCurrentUserAlreadyFollowed(false)
         }
     }
 
     const renderFollowButton = () => {
-        if (!isMe) {
+        if (!isMe && !isGuestBanned) {
             if (currentUserAlreadyFollowed) {
                 return <div className={styles.userInfoButton} onClick={() => followHandler(false)}>Unfollow</div>
             }
             if (!currentUserAlreadyFollowed) {
                 return <div onClick={() => followHandler(true)} className={styles.userInfoButton}>Follow</div>
             }
-        }else{
+        } else if(isMe){
             return <div onClick={() => setArticlePopupIsOpen(true)} className={styles.userInfoButton}>Create an article</div>
-        }
+        }else if(isGuestBanned && !isMe){
+            return <div className={styles.blockedText}>You have been blocked by this user</div>
+        }        
     }
 
     const onArticleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLInputElement>) => {
@@ -135,16 +125,16 @@ const UserPage: React.FC = (props: any) => {
     const renderNewArticlePopup = () => {
         return <div className={styles.newArticlePopup}>
             <input
-                className={styles.articleTitle} 
-                type='text' 
+                className={styles.articleTitle}
+                type='text'
                 placeholder='Title...'
                 value={inputsState.articleTitle}
                 name='articleTitle'
                 onChange={onArticleInputChange}
             />
-            <textarea 
-                placeholder='Type something special...' 
-                className={styles.articleText} 
+            <textarea
+                placeholder='Type something special...'
+                className={styles.articleText}
                 value={inputsState.articleText}
                 name='articleText'
                 onChange={onArticleInputChange}
@@ -159,17 +149,17 @@ const UserPage: React.FC = (props: any) => {
     const renderFollowInfoPopup = () => {
         let data = null
         if (popupFor === 'followers') {
-            data = userInfo.followers ? userInfo.followers : []
+            data = userGuestInfo.followers ? userGuestInfo.followers : []
         }
         if (popupFor === 'followed') {
-            data = userInfo.followed ? userInfo.followed : []
+            data = userGuestInfo.followed ? userGuestInfo.followed : []
         }
         return <div className={styles.popup}>
             <div className={styles.popupHeader}>
                 <div className={styles.popupClose} onClick={() => setPopupFor('')}>X</div>
             </div>
             {_.map(data, (item: string, key) => {
-                return <div className={styles.followPopupUser}>
+                return <div key={key} className={styles.followPopupUser}>
                     <div className={styles.followPopupUserPhoto}></div>
                     <Link className={styles.followPopupUserName} to={`/account/${key}`}>{item}</Link>
                 </div>
@@ -178,13 +168,14 @@ const UserPage: React.FC = (props: any) => {
     }
 
     const renderArticles = () => {
-        if(_.isEmpty(userInfo.articles)){
+        if (_.isEmpty(userGuestInfo.articles) || isGuestBanned) {
             return <div>There is no articles yet...</div>
         }
-        return _.map(userInfo.articles as any, article => {
-            return <Article 
+        return _.map(userGuestInfo.articles as any, article => {
+            return <Article
+                key={article.name}
                 isMe={isMe}
-                userName={userInfo.displayName}
+                userName={userGuestInfo.displayName}
                 articleTitle={article.name}
                 articleText={article.text}
                 articleComments={0}
@@ -194,23 +185,22 @@ const UserPage: React.FC = (props: any) => {
         })
     }
 
-    const goToChat = () => {
-        window.localStorage.setItem('chatWith', idFromUrl)
-        update(ref(db, `users/${user.id}/chats/`), {
-            [userInfo.id]: idFromUrl
-        });
-    }
-
     const blockUser = () => {
         update(ref(db, `users/${user.id}/blockedUsers/`), {
             [idFromUrl]: true
         });
+        setUserMenuIsOpen(false)
     }
 
-    const sendmessageButton = () => {
-        window.localStorage.setItem('chatWith', userInfo.id)
-        window.localStorage.setItem('chatWithName', userInfo.displayName)
-        update(ref(db, `users/${user.id}/chats/${userInfo.id + '_' + userInfo.displayName}`), {
+    const unBlockUser = () => {
+        remove(ref(db, `users/${user.id}/blockedUsers/${idFromUrl}`))
+        setUserMenuIsOpen(false)
+    }
+
+    const sendMessageButton = () => {
+        window.localStorage.setItem('chatWith', userGuestInfo.id)
+        window.localStorage.setItem('chatWithName', userGuestInfo.displayName)
+        update(ref(db, `users/${user.id}/chats/${userGuestInfo.id + '_' + userGuestInfo.displayName}`), {
             temporaryChat: true
         });
     }
@@ -223,38 +213,41 @@ const UserPage: React.FC = (props: any) => {
                     <div className={styles.userBlockLeft}>
                         <div className={styles.userPhoto}></div>
                         <div className={styles.userInfo}>
-                            <div className={styles.userName}>@{userInfo.displayName}</div>
+                            <div className={styles.userName}>@{userGuestInfo.displayName}</div>
                             <div className={styles.userInfoActivity}>
                                 {popupFor && renderFollowInfoPopup()}
-                                <div className={styles.userPosts}>{userInfo.articles ?  _.size(userInfo.articles) : 0} Posts</div>
+                                <div className={styles.userPosts}>{userGuestInfo.articles && !isGuestBanned ? _.size(userGuestInfo.articles) : 0} Posts</div>
                                 <div
                                     onClick={() => setPopupFor('followers')}
                                     className={styles.userFollowers}
                                 >
-                                    {userInfo.followers ? _.size(userInfo.followers) : 0} Followers
+                                    {userGuestInfo.followers && !isGuestBanned ? _.size(userGuestInfo.followers) : 0} Followers
                                 </div>
                                 <div className={styles.userFollowed}
                                     onClick={() => setPopupFor('followed')}
                                 >
-                                    {userInfo.followed ? _.size(userInfo.followed) : 0} Followed
+                                    {userGuestInfo.followed && !isGuestBanned ? _.size(userGuestInfo.followed) : 0} Followed
                                 </div>
                             </div>
                             <div className={styles.userButtonsWrapper}>
                                 {renderFollowButton()}
-                                {!isMe && <Link to={`/account/${user.id}/messages`} onClick={() => {
-                                    sendmessageButton()
+                                {!isMe && !isGuestBanned && <Link to={`/account/${user.id}/messages`} onClick={() => {
+                                    sendMessageButton()
                                 }} className={styles.userInfoButton}>Send a message</Link>}
                             </div>
                         </div>
                     </div>
                     <div className={styles.userMenuBlock}>
-                        {! isMe && <div className={styles.userMenuWrapper} onClick={() => {
+                        {!isMe && <div className={styles.userMenuWrapper} onClick={() => {
                             setUserMenuIsOpen(!userMenuIsOpen)
                         }}>
-                            <MenuIcon className={styles.menuIcon}/>
+                            <MenuIcon className={styles.menuIcon} />
                         </div>}
                         {userMenuIsOpen && <div className={styles.articleMenu}>
-                            <div className={styles.articleMenuItem} onClick={() => blockUser()}>Block this user</div> 
+                            {!isGuestBannedByMe 
+                                ? <div className={styles.articleMenuItem} onClick={() => blockUser()}>Block this user</div>
+                                : <div className={styles.articleMenuItem} onClick={() => unBlockUser()}>Unblock this user</div>
+                            }
                         </div>}
                     </div>
                 </div>

@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { RouteComponentProps } from 'react-router-dom';
 import { getDatabase, ref, set, child, get, update } from "firebase/database";
 import { connect, useDispatch } from 'react-redux'
 import { saveUser } from '../../redux/action'
 import * as _ from 'lodash'
 
 import styles from './auth.module.scss'
+
+interface IAuthState {
+    isSignUp: Boolean,
+    nicknames: [],
+}
 
 const Auth: React.FC = () => {
     const [authInputs, setAuthInputs] = useState({
@@ -21,9 +25,10 @@ const Auth: React.FC = () => {
             name: ''
         }
     })
-    const [nicknames, setNicknames] = useState<any[]>([])
+    const [nicknames, setNicknames] = useState<IAuthState['nicknames']>([])
+    const [isSignUp, setIsSignUp] = useState<IAuthState['isSignUp']>(false)
     const {loginInputs, signUpInputs} = authInputs
-    const [isSignUp, setIsSignUp] = useState(false)
+    
     const dispatch = useDispatch()
 
     const db = getDatabase();
@@ -106,8 +111,8 @@ const Auth: React.FC = () => {
                             }
                         }))
                         dispatch(saveUser(snapshot.val()))
-                        // window.localStorage.setItem('userID', user.uid)
-                        // window.localStorage.setItem('userName', snapshot.val().displayName)
+                        window.localStorage.setItem('userID', user.uid)
+                        window.localStorage.setItem('userName', snapshot.val().displayName)
                     } else {
                         console.log("No data available");
                     }

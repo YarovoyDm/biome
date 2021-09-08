@@ -1,13 +1,11 @@
 import './firebase.ts'
-import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router } from 'react-router-dom';
-import history from './history';
 import { Provider } from 'react-redux'
-import { createStore, compose, applyMiddleware } from 'redux'
+import { createStore, compose } from 'redux'
 import {rootReducer} from './redux/reducers'
 
 declare global {

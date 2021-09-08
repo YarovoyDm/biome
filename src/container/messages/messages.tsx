@@ -1,58 +1,57 @@
 import React, { useEffect, useState } from 'react'
 import * as _ from 'lodash'
-import { getDatabase, ref, child, get, update, onValue } from "firebase/database";
+import { getDatabase, ref, update, onValue } from "firebase/database";
 import { RootStateOrAny, useSelector } from 'react-redux'
-import moment from 'moment'
+
 import styles from './messages.module.scss'
+
 var cn = require('classnames');
 
-const Messages = (props: any) => {
+interface IMessages {
+    userChats: object,
+    chatWith: string,
+    chatWithName: string,
+    chatInput: string,
+    messages: {
+        contents:{
+            date: number,
+            message: string,
+            author: string
+        }
+    }
+}
+
+const Messages: React.FC = () => {
     const user = useSelector((state: RootStateOrAny) => {
         return state.auth.currentUser
     })
     const db = getDatabase();
-    const dbRef = ref(db);
 
-    const [userChats, setUserChats] = useState({})
-    const [chatWith, setChatWith] = useState('')
-    const [chatWithName, setChatWithName] = useState('')
-    const [chatInput, setChatInput] = useState('')
-    const [messages, setMessages] = useState<any>({
-        
-    })
+    const [userChats, setUserChats] = useState<IMessages['userChats']>({})
+    const [chatWith, setChatWith] = useState<IMessages['chatWith']>('')
+    const [chatWithName, setChatWithName] = useState<IMessages['chatWithName']>('')
+    const [chatInput, setChatInput] = useState<IMessages['chatInput']>('')
+    const [messages, setMessages] = useState<IMessages['messages']>()
 
     useEffect(() => {
-        get(child(dbRef, `users/${user.id}/chats/`)).then((snapshot) => {
-            if (snapshot.exists()) {
-                console.log('aaa', snapshot.val())
-                setUserChats(snapshot.val())
-            } else {
-                console.log("No data available");
-            }
-        }).catch((error) => {
-            console.error(error);
-        });
         setChatWith(window.localStorage.getItem('chatWith') || '')
         setChatWithName(window.localStorage.getItem('chatWithName') || '')
-        // console.log('1', chatWith)
-        // const messagesRef = ref(db, `users/${user.id}/chats/${chatWith + '_' + chatWithName}/messages`);
-        // onValue(messagesRef, (snapshot) => {
-        //     console.log('2', messagesRef)
-        //     setMessages(snapshot.val());
-        // });
-    }, [])
+        const chatsRef = ref(db, `users/${user.id}/chats`);
+        onValue(chatsRef, (snapshot) => {
+            setUserChats(snapshot.val());
+        });
+    }, [user])
 
     useEffect(() => {
         const messagesRef = ref(db, `users/${user.id}/chats/${chatWith + '_' + chatWithName}/messages`);
-        console.log('1', chatWith, chatWithName)
         chatWith && onValue(messagesRef, (snapshot) => {
             setMessages(snapshot.val());
         });
-    }, [chatInput, chatWith])
+    }, [chatInput, chatWith, user])
 
     const renderChats = () => {
         return _.map(userChats, (chat, key) => {
-            return <div className={styles.chatItem} onClick={() => {
+            return <div key={key} className={styles.chatItem} onClick={() => {
                 setChatWith(key.split('_')[0])
                 setChatWithName(key.split('_')[1])
                 window.localStorage.setItem('chatWith', key.split('_')[0])
@@ -89,8 +88,7 @@ const Messages = (props: any) => {
         if(!messages){return null}
         ///console.log('mess', _.sortBy(messages, [(o) =>  { return -o.date }])) !!! Important problem
         return _.map(_.sortBy(messages, [(date) => { return -date.date }]), message => {
-            console.log('mess', message)
-            return <div className={cn(styles.messageBlock, { [styles.messageBlockIncoming]: message.author !== user.displayName })}>
+            return <div key={message.date} className={cn(styles.messageBlock, { [styles.messageBlockIncoming]: message.author !== user.displayName })}>
                 <div className={styles.messageWrapper}>
                     {/* <div className={styles.messageDate}>{moment(message.date).startOf('hour').fromNow()}</div> */}
                     <div className={styles.messageText}>{message.message}</div>

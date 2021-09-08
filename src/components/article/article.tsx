@@ -10,7 +10,7 @@ import {ReactComponent as Views} from '../../images/views.svg';
 
 import styles from './article.module.scss'
 
-interface IArticle  {
+interface IArticleProps  {
     userName: string,
     articleTitle: string,
     articleText: string,
@@ -20,13 +20,18 @@ interface IArticle  {
     isMe: Boolean
 }
 
-const Article: React.FC<IArticle> = (props) => {
+interface IArticleState {
+    articleMenuIsOpen: Boolean
+}
+
+const Article: React.FC<IArticleProps> = (props) => {
+    const [articleMenuIsOpen, setArticleMenuIsOpen] = useState<IArticleState['articleMenuIsOpen']>(false)
+
     const userNameLocal = window.localStorage.getItem('userName')
     const user = useSelector((state: RootStateOrAny) => {
         return state.auth.currentUser
     })  
     const db = getDatabase();
-    const [articleMenuIsOpen, setArticleMenuIsOpen] = useState(false)
 
     const addLike = () => {
         update(ref(db, `users/${props.userName}/articles/${props.articleTitle}/likes/`), {
