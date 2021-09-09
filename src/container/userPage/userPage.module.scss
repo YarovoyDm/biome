@@ -1,11 +1,11 @@
 .userInfoButton{
     min-width: 100px;
     height: 30px;
-    border: solid 1px rgb(128, 123, 123);
+    border: solid 1px #6b6b7d;
     text-align: center;
     line-height: 30px;
     border-radius: 5px;
-    color: rgb(128, 123, 123);
+    color: #6b6b7d;
     padding: 0px 15px;
     cursor: pointer;
     &:hover{
@@ -13,24 +13,49 @@
         border: solid 1px black;
     }
 }
+.socialItem:hover{
+    .socialIcons path{
+        fill: black
+    }
+}
+.socialItem,
+.socialIcons{
+    width: 25px;
+    height: 25px;
+}
+.userInfo{
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.networks{
+    height: 30px;
+}
 .userMain{
     display: flex;
     flex-direction: column;
-    fill:rgb(128, 123, 123)
+    fill:#6b6b7d
 }
 .userPhoto{
     width: 150px;
     height: 150px;
-    border-radius: 150px;
-    background: rgb(128, 123, 123);
+    border-radius: 10px;
+    background: #6b6b7d;
     margin-right: 30px;
+    background: #587bd8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    color: #f5f8fc;
 }
 .userBlock{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 60%;
-    border-bottom: solid 1px rgb(128, 123, 123);
+    width: 100%;
+    border-bottom: solid 1px #d4d4d4;
     padding-bottom: 30px;
     .userBlockLeft{
         width: 60%;
@@ -65,7 +90,7 @@
     right: 0px;
     width: 150px;
     height: 100px;
-    border: solid 1px rgb(128, 123, 123);
+    border: solid 1px #6b6b7d;
 }
 
 .userMenuBlock{
@@ -73,7 +98,7 @@
 }
 
 .articleMenuItem{
-    color: rgb(128, 123, 123);
+    color: #6b6b7d;
     cursor: pointer;
     &:hover{
         color: black;
@@ -81,17 +106,17 @@
 }
 .userName{
     font-size: 20px;
-    color: rgb(128, 123, 123);
+    color: #6b6b7d;
 }
 .userInfoActivity{
     position: relative;
     display: flex;
-    margin: 20px 0px;
+    margin: 10px 0px;
     .userPosts,
     .userFollowers,
     .userFollowed{
         margin-right: 20px;
-        color: rgb(128, 123, 123);
+        color: #6b6b7d;
         cursor: pointer;
         &:hover{
             color: black;
@@ -112,7 +137,7 @@
     background: white;
     position: absolute;
     top: 20px;
-    border: solid 1px rgb(128, 123, 123);
+    border: solid 1px #6b6b7d;
     width: 250px;
     min-height: 100px;
     border-radius: 5px;
@@ -126,11 +151,11 @@
             width: 30px;
             height: 30px;
             border-radius: 30px;
-            background: rgb(128, 123, 123);
+            background: #6b6b7d;
             margin-right: 10px;
         }
         .followPopupUserName{
-            color: rgb(128, 123, 123);
+            color: #6b6b7d;
             text-decoration: none;
             &:hover{
                 color: black;
@@ -148,7 +173,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            color: rgb(128, 123, 123);
+            color: #6b6b7d;
             &:hover{
                 color: black;
             }
@@ -166,15 +191,15 @@
     top: 100px;
     width: 50%;
     height: 400px;
-    border: solid 1px rgb(128, 123, 123);
+    border: solid 1px #6b6b7d;
     z-index: 99;
     .articleTitle{
         height: 40px;
         outline: none;
         border: none;
         font-size: 20px;
-        color: rgb(128, 123, 123);
-        border-bottom: solid 1px rgb(128, 123, 123);
+        color: #6b6b7d;
+        border-bottom: solid 1px #6b6b7d;
         margin-bottom: 30px;
         &:focus,
         &:hover{
@@ -200,14 +225,14 @@
         justify-content: flex-end;
         .articleButton{
             height: 30px;
-            border: solid 1px rgb(128, 123, 123);
+            border: solid 1px #6b6b7d;
             margin-left: 20px;
             padding: 0 10px;
             border-radius: 5px;
             text-align: center;
             line-height: 30px;
             cursor: pointer;
-            color: rgb(128, 123, 123);
+            color: #6b6b7d;
             &:hover{
                 color: black;
                 border: solid 1px black;
@@ -227,8 +252,9 @@
 
 .userArticlesBlock{
     min-height: 400px;
-    width: 60%;
-    color: rgb(128, 123, 123);
+    width: 100%;
+    padding-top: 30px;
+    color: #6b6b7d;
     font-size: 18px;
     display: flex;
     flex-direction: column;

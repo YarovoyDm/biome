@@ -101,8 +101,8 @@ const Header:React.FC = () => {
                             {user.displayName}
                         </div>
                         {userMenuShow && <div className={styles.headerUserMenu}>
-                            <Link to={'/account/' + user.id} onClick={() => setUserMenuShow(false)}>Profile</Link>
-                            <div>Settings</div>
+                            <Link to={`/account/${user.id}`} onClick={() => setUserMenuShow(false)}>Profile</Link>
+                            <Link to={`/account/${user.id}/settings`} onClick={() => setUserMenuShow(false)}>Settings</Link>
                             <div onClick={() => exit()}>Log out</div>
                         </div>}
                     </div>

@@ -1,0 +1,88 @@
+.dahsboard{
+    a{
+        text-decoration: none;
+    }
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    .dashboardMain{
+        width: calc(75% + 110px);
+        padding: 30px 40px;
+        background: #f5f8fc;
+        height: calc(100vh - 60px);
+        border-top-left-radius: 30px;
+        border-bottom-left-radius: 30px;
+        margin-left: -30px;
+        display: flex;
+        box-shadow: -1px 0px 8px 1px #d8d8d8;
+        .mainPageResult{
+            width: 75%;
+            overflow-y: auto;
+            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+            scrollbar-width: none;  /* Firefox */
+            &::-webkit-scrollbar{
+                display: none;  /* Safari and Chrome */
+            }
+        }
+    }
+    .dashboardPanel{
+        padding: 40px 60px 30px 40px;
+        background: #edeef4;
+        width: calc(25% - 100px);
+        height: calc(100vh - 70px);
+        .panelUserBlock{
+            display: flex;
+            align-items: center;
+            margin-bottom: 50px;
+            .userPhoto{
+                width: 50px;
+                height: 50px;
+                background: #587bd8;
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 26px;
+                color: #f5f8fc;
+                margin-right: 30px;
+            }
+            .userNick{
+                color: #6b6b7d;
+                text-transform: capitalize;
+            }
+        }
+        .panelNav{
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            .navItemActive{
+                color: red;
+            }
+            .navItem{
+                display: flex;
+                align-items: center;
+                margin-bottom: 15px;
+                width: 100%;
+                height: 30px;
+                .navIcon{
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 20px;
+                }
+                .navItemText{
+                    color: #6b6b7d;
+                    text-decoration: none;
+                }
+                &:hover{
+                    .navItemText{
+                        color: black;
+                    }
+                    .navIcon path{
+                        fill: black;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import Article from '../../components/article/article';
 
 import { ReactComponent as MenuIcon } from '../../images/menuIcon.svg';
+import { ReactComponent as Instagram } from '../../images/instagram.svg';
 
 import styles from './userPage.module.scss'
 
@@ -23,7 +24,10 @@ interface IUserPageState {
         followers: object,
         followed: object,
         articles: object,
-        blockedUsers: object
+        blockedUsers: object,
+        socials: {
+            instagram: string
+        }
     },
     currentUserAlreadyFollowed: Boolean,
     userMenuIsOpen: Boolean
@@ -46,7 +50,10 @@ const UserPage: React.FC = (props: any) => {
         followers: {},
         followed: {},
         articles: [],
-        blockedUsers: {}
+        blockedUsers: {},
+        socials: {
+            instagram: ''
+        }
     })
     const [currentUserAlreadyFollowed, setCurrentUserAlreadyFollowed] = useState<IUserPageState['currentUserAlreadyFollowed']>(false)
     const idFromUrl = props.match.params.id
@@ -186,6 +193,17 @@ const UserPage: React.FC = (props: any) => {
         })
     }
 
+    const renderSocials = () => {
+        const data = {
+            instagram: () => <Instagram className={styles.socialIcons}/>
+        }
+        return <div className={styles.networks}>
+            {_.map(userGuestInfo.socials, (item, key: keyof(typeof data)) => {
+                return <a target='_blank' className={styles.socialItem} href={item}>{data[key]()}</a>
+            })}
+        </div>
+    }
+
     const blockUserHandler = (type: string) => {
         if(type === 'block'){
             update(ref(db, `users/${user.id}/blockedUsers/`), {
@@ -212,7 +230,7 @@ const UserPage: React.FC = (props: any) => {
                 {articlePopupIsOpen && renderNewArticlePopup()}
                 <div className={styles.userBlock}>
                     <div className={styles.userBlockLeft}>
-                        <div className={styles.userPhoto}></div>
+                        <div className={styles.userPhoto}>{user.displayName && user.displayName.split('')[0]}</div>
                         <div className={styles.userInfo}>
                             <div className={styles.userName}>@{userGuestInfo.displayName}</div>
                             <div className={styles.userInfoActivity}>
@@ -230,6 +248,7 @@ const UserPage: React.FC = (props: any) => {
                                     {userGuestInfo.followed && !isGuestBanned ? _.size(userGuestInfo.followed) : 0} Followed
                                 </div>
                             </div>
+                            {renderSocials()}
                             <div className={styles.userButtonsWrapper}>
                                 {renderFollowButton()}
                                 {!isMe && !isGuestBanned && <Link to={`/account/${user.id}/messages`} onClick={() => {

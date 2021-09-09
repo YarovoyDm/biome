@@ -1,0 +1,12 @@
+.settingsPage{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 80px);
+    .settingsMain{
+        width: calc(60% - 100px);
+        background: red;
+        height: calc(100% - 60px);
+        padding: 30px 50px;
+    }
+}

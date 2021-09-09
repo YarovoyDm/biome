@@ -13,6 +13,8 @@ import {PublicRoute, PrivateRoute} from './routeComponents'
 import Messages from './container/messages/messages';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref, onValue } from "firebase/database";
+import SettingsPage from './container/settingsPage/settingsPage';
+import Dashboard from './container/dashboard/dashboard';
 
 function App() {
   const dispatch = useDispatch()
@@ -35,12 +37,10 @@ function App() {
 
   return (
     <div>
-      <Header />
+      {/* <Header /> */}
       <Switch>
-        {/* <Route exact={true} path='/feed' component={Feed} /> */}
-        <PrivateRoute path='/account/:nick/messages' component={Messages} />
+        <PrivateRoute path='/dashboard' component={Dashboard} />
         <PublicRoute path='/auth' component={withRouter(AuthPage)} />
-        <PrivateRoute path='/account/:id' component={withRouter(UserPage)} />
       </Switch>
     </div>
   );

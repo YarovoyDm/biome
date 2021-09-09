@@ -56,7 +56,10 @@ const Messages: React.FC = () => {
                 setChatWithName(key.split('_')[1])
                 window.localStorage.setItem('chatWith', key.split('_')[0])
                 window.localStorage.setItem('chatWithName', key.split('_')[1])
-            }}>{key.split('_')[1]}</div>
+            }}>
+                <div className={styles.chatUserPhoto}>{key.split('_')[1].split('')[0]}</div>
+                <div className={styles.chatUserName}>{key.split('_')[1]}</div>
+            </div>
         })
     }
 

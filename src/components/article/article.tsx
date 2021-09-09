@@ -34,7 +34,7 @@ const Article: React.FC<IArticleProps> = (props) => {
     const db = getDatabase();
     const isILiked = _.includes(_.keys(props.articleLikes), user.id)
 
-    const addLike = () => {
+    const likeHandler = () => {
         isILiked 
         ?
         remove(ref(db, `users/${props.idFromUrl}/articles/${props.articleTitle}/likes/${user.id}`))
@@ -52,29 +52,31 @@ const Article: React.FC<IArticleProps> = (props) => {
     return (
         <div className={styles.article}>
             <div className={styles.articleHeader}>
-                <div className={styles.userBlock}>
-                    <div className={styles.userPhoto}></div>
-                    <div className={styles.userName}>{props.userName}</div>
-                </div>
-                <div className={styles.articleMenuBlock}>
-                    <div className={styles.articleMenuWrapper} onClick={() => setArticleMenuIsOpen(!articleMenuIsOpen)}>
-                        <MenuIcon className={styles.articleMenuButton}/>
+                <div className={styles.articleTitle}>{props.articleTitle}</div>
+                <div className={styles.articleSubBlock}>
+                    <div className={styles.userBlock}>
+                        <div className={styles.userPhoto}>{user.displayName && user.displayName.split('')[0]}</div>
+                        <div className={styles.userName}>{props.userName}</div>
                     </div>
-                    {articleMenuIsOpen && <div className={styles.articleMenu}>
-                        {props.isMe 
-                        ? 
-                        <div className={styles.articleMenuItem} onClick={() => removeArticle()}>Delete an article</div> 
-                        : 
-                        <div className={styles.articleMenuItem}>Report</div>}  
-                    </div>}
+                    <div className={styles.articleMenuBlock}>
+                        <div className={styles.articleMenuWrapper} onClick={() => setArticleMenuIsOpen(!articleMenuIsOpen)}>
+                            <MenuIcon className={styles.articleMenuButton}/>
+                        </div>
+                        {articleMenuIsOpen && <div className={styles.articleMenu}>
+                            {props.isMe 
+                            ? 
+                            <div className={styles.articleMenuItem} onClick={() => removeArticle()}>Delete an article</div> 
+                            : 
+                            <div className={styles.articleMenuItem}>Report</div>}  
+                        </div>}
+                    </div>
                 </div>
             </div>
             <div className={styles.articleMain}>
-                <div className={styles.articleTitle}>{props.articleTitle}</div>
                 <div className={styles.articleText}>{props.articleText}</div>
             </div>
             <div className={styles.articleFooter}>
-                <div className={styles.articleLikes} onClick={() => addLike()}>
+                <div className={styles.articleLikes} onClick={() => likeHandler()}>
                     <Like className={cn(styles.articleSvg, styles.articleLike, isILiked && styles.likeActive)}/> 
                     {_.size(props.articleLikes)}
                 </div>
